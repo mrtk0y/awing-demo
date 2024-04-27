@@ -1,44 +1,44 @@
-import { Button } from "@mui/material";
-import React, { useCallback } from "react";
-import { useImperativeHandle } from "react";
+import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
-export type CampainRefFuncs = {
-  refSubmit: () => void
+type Props = {
+  isSubmitting: boolean
+  handleSetSubmit :()=>void
 }
-
-const Campaign = React.forwardRef<CampainRefFuncs>(
-  (_props, ref) => {
+const Campaign = ({isSubmitting,handleSetSubmit}:Props) => {
     const { register, handleSubmit } = useForm()
 
-    const onSubmit = (values: unknown) => {
-      // form submit action here
-      console.log('!!values', values);
-    }
+    const onSubmit = useCallback(
+      (values: unknown) => {
+        // form submit action here
+        console.log('!!values', values);
+        try {
+          //
+        } catch (err) {
+          //
+        } finally {
+          handleSetSubmit()
+        }
+      },
+      [handleSetSubmit]
+    )
 
-    const refSubmit = useCallback(() => {
-      console.log('12');
 
-      handleSubmit(onSubmit)()
-    }
-    , [handleSubmit])
 
-      useImperativeHandle(ref, () => {
-      return {
-        refSubmit
+    useEffect(() => {
+      if(isSubmitting){
+        handleSubmit(onSubmit)()
       }
-    }, [refSubmit])
-
+    }, [handleSubmit, isSubmitting, onSubmit])
 
     return (
       <form onSubmit={handleSubmit(onSubmit)}>
         <label>Hehe</label>
         <input {...register("hehe")} />
 
-        <Button type="submit" variant="contained"  >Submit</Button>
 
       </form>
     )
-  })
+  }
 
 export default Campaign

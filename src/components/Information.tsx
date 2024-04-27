@@ -1,24 +1,38 @@
 
 
-import  { forwardRef, useImperativeHandle,  } from 'react'
+import  {  useCallback, useEffect   } from 'react'
 import { useForm } from 'react-hook-form'
-
-const Information = forwardRef((props,ref) => {
+type Props = {
+  isSubmitting: boolean
+  handleSetSubmit :()=>void
+}
+const Information = ({handleSetSubmit,isSubmitting}:Props) => {
   const { register ,handleSubmit} = useForm()
 
-  const onSubmit = (values:unknown)=>{
-    console.log('!!values',values);
 
-
-  }
-
-  useImperativeHandle(ref, () => {
-    return {
-      submitInformation(){
-        handleSubmit(onSubmit)
+  const onSubmit = useCallback(
+    (values: unknown) => {
+      // form submit action here
+      console.log('!!values', values);
+      try {
+        //
+      } catch (err) {
+        //
+      } finally {
+        handleSetSubmit()
       }
-    };
-  }, [handleSubmit]);
+    },
+    [handleSetSubmit]
+  )
+
+
+
+  useEffect(() => {
+    if(isSubmitting){
+      handleSubmit(onSubmit)()
+    }
+  }, [handleSubmit, isSubmitting, onSubmit])
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -30,6 +44,6 @@ const Information = forwardRef((props,ref) => {
 
   </form>
   )
-})
+}
 
 export default Information
