@@ -8,11 +8,19 @@ import Campaign from './components/Campaign';
 import { Button } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import { useForm } from 'react-hook-form';
+import { isEmpty } from './utils/isEmptyObject';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 enum FORMS {
   INFORMATION,
   CAMPAIGN
 }
+
+
+const schema = z.object({
+  name: z.string().min(1, { message: 'Required' }),
+});
 
 export type TFormData = {
   name: string
@@ -20,6 +28,8 @@ export type TFormData = {
   description: string
   childCampaign: TChildCampaign[]
 }
+
+export type FormFields = z.infer<typeof schema>
 
 export type TChildCampaign = {
   name: string
@@ -36,7 +46,8 @@ function App() {
   const [activeTab, setActiveTab] = useState(FORMS.CAMPAIGN)
 
 
-  const { handleSubmit, control, formState: { errors } } = useForm({
+  const { handleSubmit, control, formState: { errors }, watch } = useForm({
+    resolver: zodResolver(schema),
     defaultValues: {
       name: "",
       description: "",
@@ -56,21 +67,25 @@ function App() {
     },
   })
 
-  const onSubmit = async (values: unknown) => {
-    // form submit action here
-    console.log('!!values', values);
-    try {
-      //
-    } catch (err) {
-      //
-    }
+
+
+
+
+  const onSubmit = (values: unknown) => {
+    console.log('!!values', values, isEmpty(errors));
   }
 
   return (
     <Box paddingY={1}>
       <Box display={'flex'} justifyContent={'end'} paddingX={2}>
         <Button type="submit" variant="contained"
-          onClick={handleSubmit(onSubmit)}
+          onClick={() => {
+            if (isEmpty(errors)) {
+              handleSubmit(onSubmit)()
+            } else {
+              alert('Please fill all required fields')
+            }
+          }}
         >Submit</Button>
       </Box>
 
@@ -92,6 +107,7 @@ function App() {
         <CustomTabPanel value={activeTab} index={FORMS.CAMPAIGN}>
           <Campaign
             control={control}
+            watch={watch}
           />
         </CustomTabPanel>
 

@@ -1,5 +1,4 @@
 import { TextField } from '@mui/material'
-import React from 'react'
 import { Controller } from 'react-hook-form'
 
 type Props = {
@@ -10,7 +9,7 @@ type Props = {
   number?: number
 }
 
-const Advertisement = ({ control, name, label, number }: Props) => {
+const Advertisement = ({ control, name, label }: Props) => {
   return (
     <Controller
       name={name}

@@ -13,8 +13,6 @@ type Props = {
 }
 
 const Information = ({ control, errors }: Props) => {
-  console.log('!errors', errors);
-
 
   return (
     <Box>

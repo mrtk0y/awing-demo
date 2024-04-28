@@ -1,36 +1,30 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { Fragment, useState } from "react";
-import { Controller, useFieldArray, useWatch } from "react-hook-form";
+import { Controller, useFieldArray } from "react-hook-form";
 import Advertisement from "./Advertisement";
 
 type Props = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: any
-
-
-}
-const Campaign = ({ control }: Props) => {
-  //TODO: fix any type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { append, fields } = useFieldArray<any>({
+  watch: any
+  //TODO: fix any type
+}
+
+const Campaign = ({ control, watch }: Props) => {
+  const { append } = useFieldArray({
     control,
     name: `childCampaign`
   });
-  const [activeCampaign, setActiveCampaign] = useState(fields?.[0]?.id)
 
+  const [activeCampaign, setActiveCampaign] = useState(0)
 
-  console.log('!fields', fields);
-  const item = useWatch({ control, name: `childCampaign` });
-  console.log('!item', item);
+  const { childCampaign } = watch()
 
-
-
-  const nextNumberOfChildCampaign = ` ${Number(fields.length) + 1}`
-
+  const nextNumberOfChildCampaign = ` ${Number(childCampaign.length) + 1}`
 
   return (
     <Fragment>
-      {activeCampaign}
       <Button onClick={() => {
         append({
           name: "Chiến dịch" + nextNumberOfChildCampaign,
@@ -41,12 +35,14 @@ const Campaign = ({ control }: Props) => {
             label: "Quảng cáo" + nextNumberOfChildCampaign,
           }]
         })
-      }}>
+      }}
+        variant="contained">
         Add
       </Button>
       <Box display="flex" gap={2}>
         {
-          fields?.map((campaign) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          childCampaign?.map((campaign: any, index: any) => {
             return (
               <Box
                 key={campaign.id}
@@ -61,8 +57,8 @@ const Campaign = ({ control }: Props) => {
                 }}
                 borderRadius={1}
                 border={2}
-                borderColor={activeCampaign === campaign.id ? 'rgb(33, 150, 243)' : 'white'}
-                onClick={() => setActiveCampaign(campaign.id)}
+                borderColor={activeCampaign === index ? 'rgb(33, 150, 243)' : 'white'}
+                onClick={() => setActiveCampaign(index)}
               >
                 {campaign?.name}
               </Box>)
@@ -71,28 +67,32 @@ const Campaign = ({ control }: Props) => {
       </Box>
       <Box>
         {
-          fields?.map((campaign) => {
-            if (activeCampaign === campaign.id) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          childCampaign?.map((campaign: any, index: any) => {
+            if (activeCampaign === index) {
               return <Box key={campaign.id}>
-                <Controller name={'name'}
+                <Controller name={`childCampaign[${activeCampaign}].name`}
                   control={control}
-                  render={({ field }) => <TextField {...field} label="Mô tả" variant="standard" fullWidth margin="dense" />}
+                  render={({ field }) => <TextField {...field} label="Tên Campaign" variant="standard" fullWidth margin="dense" />}
                 />
-
               </Box>
             }
           })
         }
-        <Typography textTransform="uppercase" fontSize={22}>
-          danh sách quảng cáo
-        </Typography>
+
+        <Box marginTop={2}>
+          <Typography textTransform="uppercase" fontSize={22}>
+            danh sách quảng cáo
+          </Typography>
+        </Box>
 
         {
-          fields?.map((campaign) => {
-            if (activeCampaign === campaign.id) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          childCampaign?.map((campaign: any, index: any) => {
+            if (activeCampaign === index) {
               return <Box key={campaign.id}>
-                {campaign.advertisement.map((ad) => <Box key={ad.id} >
-                  <Advertisement control={control} name={`campaign[${campaign.id}].advertisement[${ad.id}].label`} label={ad.label} />
+                {campaign.advertisement.map((ad, adIndex) => <Box key={ad.id} >
+                  <Advertisement control={control} name={`campaign[${campaign.id}].advertisement[${adIndex}].label`} label={ad.label} />
                 </Box>)}
               </Box>
             }
