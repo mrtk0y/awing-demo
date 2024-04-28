@@ -1,48 +1,48 @@
 
 
-import  {  useCallback, useEffect   } from 'react'
-import { useForm } from 'react-hook-form'
+import { Box, TextField, Typography } from '@mui/material'
+import { Controller, FieldErrors } from 'react-hook-form'
+import { Fragment } from 'react/jsx-runtime'
+import { ErrorMessage } from "@hookform/error-message"
+import { TFormData } from '../App'
+
 type Props = {
-  isSubmitting: boolean
-  handleSetSubmit :()=>void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control: any
+  errors: FieldErrors<TFormData>
 }
-const Information = ({handleSetSubmit,isSubmitting}:Props) => {
-  const { register ,handleSubmit} = useForm()
 
-
-  const onSubmit = useCallback(
-    (values: unknown) => {
-      // form submit action here
-      console.log('!!values', values);
-      try {
-        //
-      } catch (err) {
-        //
-      } finally {
-        handleSetSubmit()
-      }
-    },
-    [handleSetSubmit]
-  )
-
-
-
-  useEffect(() => {
-    if(isSubmitting){
-      handleSubmit(onSubmit)()
-    }
-  }, [handleSubmit, isSubmitting, onSubmit])
+const Information = ({ control, errors }: Props) => {
+  console.log('!errors', errors);
 
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <label>First Name</label>
-      <input {...register("firstName")} />
-      <label>Gender Selection</label>
+    <Box>
+      <Controller name="name"
+        control={control}
+        rules={{ required: 'Tên chiến dịch không được để trống' }}
+        render={({ field }) => {
+          return <Fragment>
+            <TextField
+              {...field} label="Tên chiến dịch" variant="standard" required fullWidth margin="dense"
+              error={!!errors.name}
+            />
+            <ErrorMessage errors={errors} name='name'
+              render={({ message }) =>
+                <Typography fontSize={14} color='red'>
+                  {message}
+                </Typography>
+              } />
+          </Fragment>
+        }
+        }
+      />
 
-      {/* <Button  type="submit" variant="contained"  >Submit</Button> */}
-
-  </form>
+      <Controller name="description"
+        control={control}
+        render={({ field }) => <TextField {...field} label="Mô tả" variant="standard" fullWidth margin="dense" />}
+      />
+    </Box >
   )
 }
 
