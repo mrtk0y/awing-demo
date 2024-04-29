@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 //TODO: fix any type
 
 import { Box, Button, Checkbox, Divider, FormControlLabel, TextField, Typography } from "@mui/material";
 import { Fragment, useState } from "react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
-import Advertisement from "./Advertisement";
+import AdvertisementCard from "./AdvertisementCard";
 import { ErrorMessage } from "@hookform/error-message";
 
 type Props = {
@@ -16,32 +17,41 @@ const Campaign = ({ control, watch }: Props) => {
   const { getFieldState } = useFormContext();
   const [activeCampaign, setActiveCampaign] = useState(0)
 
-  const { append } = useFieldArray({
+  const { insert } = useFieldArray({
     control,
     name: `childCampaign`
   });
 
-  const { append: appendAdv } = useFieldArray({
+  const { insert: insertAdv } = useFieldArray({
     control,
     name: `childCampaign[${activeCampaign}].advertisement`
   });
 
   const { childCampaign } = watch()
 
-  const nextNumberOfChildCampaign = ` ${Number(childCampaign.length) + 1}`
+
+
+  const [_countAd, setCountAd] = useState(1)
+  const [_countCampaign, setCountCampaign] = useState(1)
 
   return (
     <Fragment>
       <Button onClick={() => {
-        append({
-          name: "Chiến dịch" + nextNumberOfChildCampaign,
-          isActive: true,
-          advertisement: [{
-            title: 'ad' + nextNumberOfChildCampaign,
-            quantity: 0,
-            name: "Quảng cáo" + nextNumberOfChildCampaign,
-          }]
+        setCountCampaign(pre => {
+          const nextNum = Number(pre) + 1
+          insert(nextNum, {
+            name: "Chiến dịch " + nextNum,
+            isActive: true,
+            id: nextNum,
+            advertisement: [{
+              id: 1,
+              quantity: 0,
+              name: "Quảng cáo " + 1,
+            }]
+          })
+          return nextNum
         })
+
       }}
         variant="contained">
         Thêm chiến dịch
@@ -78,7 +88,9 @@ const Campaign = ({ control, watch }: Props) => {
                     </Typography>}
                   </Box>
                   <Typography textAlign={'center'}>
-                    {childCampaign[activeCampaign].advertisement?.length}
+                    {
+                      campaign.advertisement.length
+                    }
                   </Typography>
                 </Box>
               </Box>
@@ -126,12 +138,15 @@ const Campaign = ({ control, watch }: Props) => {
             <Typography flexGrow={1}>Tên quảng cáo * </Typography>
             <Typography flexGrow={1}>Số lượng * </Typography>
             <Button onClick={() => {
-              appendAdv({
-                id: nextNumberOfChildCampaign,
-                title: 'ad' + nextNumberOfChildCampaign,
-                quantity: 0,
-                name: "Quảng cáo" + nextNumberOfChildCampaign,
+              setCountAd(pre => {
+                insertAdv(pre + 1, {
+                  id: pre + 1,
+                  quantity: 0,
+                  name: "Quảng cáo " + (Number(pre) + 1),
+                })
+                return pre + 1
               })
+
             }}
               variant='contained'>
               Thêm
@@ -143,13 +158,20 @@ const Campaign = ({ control, watch }: Props) => {
           childCampaign?.map((campaign: any, index: number) => {
             if (activeCampaign === index) {
               return <Box key={index}>
-                {campaign.advertisement.map((_ad: any, adIndex: number) => <Box key={adIndex} >
-                  <Advertisement
-                    control={control}
-                    name={`childCampaign[${activeCampaign}].advertisement[${adIndex}].name`}
-                    quantity={`childCampaign[${activeCampaign}].advertisement[${adIndex}].quantity`}
-                  />
-                </Box>)}
+                {campaign.advertisement.map((ad: any, adIndex: number) => {
+                  return (
+                    <Box key={ad.id} >
+                      <AdvertisementCard
+                        position={adIndex}
+                        activeCampaign={activeCampaign}
+                        control={control}
+                        name={`childCampaign[${activeCampaign}].advertisement[${adIndex}].name`}
+                        quantity={`childCampaign[${activeCampaign}].advertisement[${adIndex}].quantity`}
+                      />
+                    </Box>
+                  )
+
+                })}
               </Box>
             }
           })

@@ -59,6 +59,7 @@ function App() {
       description: "",
       childCampaign: [
         {
+          id: 1,
           name: "Chiến dịch 1",
           isActive: true,
           advertisement: [
