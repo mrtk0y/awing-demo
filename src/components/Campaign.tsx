@@ -1,25 +1,38 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+//TODO: fix any type
+
+import { Box, Button, Checkbox, FormControlLabel, TextField, Typography } from "@mui/material";
 import { Fragment, useState } from "react";
-import { Controller, useFieldArray } from "react-hook-form";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import Advertisement from "./Advertisement";
+import { ErrorMessage } from "@hookform/error-message";
 
 type Props = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   watch: any
-  //TODO: fix any type
 }
 
 const Campaign = ({ control, watch }: Props) => {
+  const { getFieldState } = useFormContext();
+  const [activeCampaign, setActiveCampaign] = useState(0)
+
   const { append } = useFieldArray({
     control,
     name: `childCampaign`
   });
 
-  const [activeCampaign, setActiveCampaign] = useState(0)
+
+  const { append: appendAdv } = useFieldArray({
+    control,
+    name: `childCampaign[${activeCampaign}].advertisement`
+  });
+
+
 
   const { childCampaign } = watch()
+
+
+
 
   const nextNumberOfChildCampaign = ` ${Number(childCampaign.length) + 1}`
 
@@ -28,8 +41,9 @@ const Campaign = ({ control, watch }: Props) => {
       <Button onClick={() => {
         append({
           name: "Chiến dịch" + nextNumberOfChildCampaign,
+          isActive: true,
           advertisement: [{
-            id: 1,
+            id: nextNumberOfChildCampaign,
             title: 'ad' + nextNumberOfChildCampaign,
             number: 0,
             label: "Quảng cáo" + nextNumberOfChildCampaign,
@@ -41,11 +55,10 @@ const Campaign = ({ control, watch }: Props) => {
       </Button>
       <Box display="flex" gap={2}>
         {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          childCampaign?.map((campaign: any, index: any) => {
+          childCampaign?.map((campaign: any, index: number) => {
             return (
               <Box
-                key={campaign.id}
+                key={index}
                 boxShadow={2}
                 padding={2}
                 marginY={2}
@@ -60,45 +73,85 @@ const Campaign = ({ control, watch }: Props) => {
                 borderColor={activeCampaign === index ? 'rgb(33, 150, 243)' : 'white'}
                 onClick={() => setActiveCampaign(index)}
               >
-                {campaign?.name}
-              </Box>)
+                <Box display='flex' flexDirection={'column'}>
+                  <Typography height={16} color={campaign?.name ? 'black' : 'gray'}>
+                    {campaign?.name || 'Chưa có tên'}
+                  </Typography>
+                  <Box textAlign={'center'}>
+                    {campaign?.isActive ? <Typography color={'green'}>
+                      Đang hoạt động
+                    </Typography> : <Typography color={'red'}>
+                      Không hoạt động
+                    </Typography>}
+                  </Box>
+                  <Typography textAlign={'center'}>
+                    {childCampaign[activeCampaign].advertisement?.length}
+                  </Typography>
+                </Box>
+              </Box>
+            )
           })
         }
       </Box>
       <Box>
         {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          childCampaign?.map((campaign: any, index: any) => {
+          childCampaign?.map((_campaign: any, index: number) => {
             if (activeCampaign === index) {
-              return <Box key={campaign.id}>
+              return <Box key={index} display="flex">
                 <Controller name={`childCampaign[${activeCampaign}].name`}
                   control={control}
-                  render={({ field }) => <TextField {...field} label="Tên Campaign" variant="standard" fullWidth margin="dense" />}
+                  // render={({ field }) => <TextField {...field} label="Tên Campaign" variant="standard" fullWidth margin="dense" />}
+                  render={({ field }) => <Box flexGrow={1}>
+                    <TextField {...field} variant="standard" fullWidth margin="dense"
+                      error={!!getFieldState(`childCampaign[${activeCampaign}].name`).error?.message}
+                    />
+                    <ErrorMessage name={`childCampaign[${activeCampaign}].name`}
+                      render={({ message }) =>
+                        <Typography fontSize={14} color='red'>
+                          {message}
+                        </Typography>
+                      } />
+                  </Box>
+                  }
+                />
+                <Controller name={`childCampaign[${activeCampaign}].isActive`}
+                  control={control}
+                  render={({ field }) => <FormControlLabel {...field} control={<Checkbox checked={field.value} />} label="Đang hoạt động" />}
                 />
               </Box>
             }
           })
         }
-
-        <Box marginTop={2}>
+        <Box marginTop={2} display='flex' justifyContent='space-between'>
           <Typography textTransform="uppercase" fontSize={22}>
             danh sách quảng cáo
           </Typography>
+          <Button onClick={() => {
+            appendAdv({
+              id: nextNumberOfChildCampaign,
+              title: 'ad' + nextNumberOfChildCampaign,
+              quantity: 0,
+              name: "Quảng cáo" + nextNumberOfChildCampaign,
+            })
+          }}>
+            Thêm
+          </Button>
         </Box>
-
         {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          childCampaign?.map((campaign: any, index: any) => {
+          childCampaign?.map((campaign: any, index: number) => {
             if (activeCampaign === index) {
-              return <Box key={campaign.id}>
-                {campaign.advertisement.map((ad, adIndex) => <Box key={ad.id} >
-                  <Advertisement control={control} name={`campaign[${campaign.id}].advertisement[${adIndex}].label`} label={ad.label} />
+              return <Box key={index}>
+                {campaign.advertisement.map((_ad: any, adIndex: number) => <Box key={adIndex} >
+                  <Advertisement
+                    control={control}
+                    name={`childCampaign[${activeCampaign}].advertisement[${adIndex}].name`}
+                    quantity={`childCampaign[${activeCampaign}].advertisement[${adIndex}].quantity`}
+                  />
                 </Box>)}
               </Box>
             }
           })
         }
-
 
       </Box>
 

@@ -1,13 +1,13 @@
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import CustomTabPanel from './components/CustomTabs';
 import Information from './components/Information';
 import Campaign from './components/Campaign';
 import { Button } from '@mui/material';
 import Divider from '@mui/material/Divider';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { isEmpty } from './utils/isEmptyObject';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,7 +19,14 @@ enum FORMS {
 
 
 const schema = z.object({
-  name: z.string().min(1, { message: 'Required' }),
+  name: z.string().min(1, { message: 'Bắt buộc' }),
+  childCampaign: z.array(z.object({
+    name: z.string().min(1, { message: 'Bắt buộc' }),
+    advertisement: z.array(z.object({
+      quantity: z.number().min(1, { message: 'Số phải lớn hơn 0' }),
+      name: z.string().min(1, { message: 'Bắt buộc' })
+    }))
+  })).nonempty({ message: 'Bắt buộc' })
 });
 
 export type TFormData = {
@@ -36,9 +43,8 @@ export type TChildCampaign = {
   id: string
   advertisement: {
     id: number
-    title: string
-    number: number
-    label: string
+    quantity: number
+    name: string
   }[]
 }
 function App() {
@@ -46,7 +52,7 @@ function App() {
   const [activeTab, setActiveTab] = useState(FORMS.CAMPAIGN)
 
 
-  const { handleSubmit, control, formState: { errors }, watch } = useForm({
+  const method = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
@@ -54,12 +60,12 @@ function App() {
       childCampaign: [
         {
           name: "Chiến dịch 1",
+          isActive: true,
           advertisement: [
             {
-              id: 0,
-              title: 'ad',
-              number: 0,
-              label: "Quảng cáo 1"
+              id: 1,
+              quantity: 0,
+              name: "Quảng cáo 1"
             }
           ]
         }
@@ -68,11 +74,13 @@ function App() {
   })
 
 
+  const { handleSubmit, control, formState: { errors, }, watch, } = method
 
 
 
   const onSubmit = (values: unknown) => {
     console.log('!!values', values, isEmpty(errors));
+    alert(JSON.stringify(values, null, 2))
   }
 
   return (
@@ -80,11 +88,7 @@ function App() {
       <Box display={'flex'} justifyContent={'end'} paddingX={2}>
         <Button type="submit" variant="contained"
           onClick={() => {
-            if (isEmpty(errors)) {
-              handleSubmit(onSubmit)()
-            } else {
-              alert('Please fill all required fields')
-            }
+            handleSubmit(onSubmit)()
           }}
         >Submit</Button>
       </Box>
@@ -101,16 +105,21 @@ function App() {
           </Tabs>
         </Box>
 
-        <CustomTabPanel value={activeTab} index={FORMS.INFORMATION}>
-          <Information control={control} errors={errors} />
-        </CustomTabPanel>
-        <CustomTabPanel value={activeTab} index={FORMS.CAMPAIGN}>
-          <Campaign
-            control={control}
-            watch={watch}
-          />
-        </CustomTabPanel>
+        <FormProvider {...method}>
 
+
+          <Fragment>
+            <CustomTabPanel value={activeTab} index={FORMS.INFORMATION}>
+              <Information control={control} errors={errors} />
+            </CustomTabPanel>
+            <CustomTabPanel value={activeTab} index={FORMS.CAMPAIGN}>
+              <Campaign
+                control={control}
+                watch={watch}
+              />
+            </CustomTabPanel>
+          </Fragment>
+        </FormProvider>
       </Box>
     </Box>
   )
