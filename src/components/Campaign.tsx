@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 //TODO: fix any type
 
-import { Box, Button, Checkbox, FormControlLabel, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Divider, FormControlLabel, TextField, Typography } from "@mui/material";
 import { Fragment, useState } from "react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import Advertisement from "./Advertisement";
@@ -21,18 +21,12 @@ const Campaign = ({ control, watch }: Props) => {
     name: `childCampaign`
   });
 
-
   const { append: appendAdv } = useFieldArray({
     control,
     name: `childCampaign[${activeCampaign}].advertisement`
   });
 
-
-
   const { childCampaign } = watch()
-
-
-
 
   const nextNumberOfChildCampaign = ` ${Number(childCampaign.length) + 1}`
 
@@ -43,15 +37,14 @@ const Campaign = ({ control, watch }: Props) => {
           name: "Chiến dịch" + nextNumberOfChildCampaign,
           isActive: true,
           advertisement: [{
-            id: nextNumberOfChildCampaign,
             title: 'ad' + nextNumberOfChildCampaign,
-            number: 0,
-            label: "Quảng cáo" + nextNumberOfChildCampaign,
+            quantity: 0,
+            name: "Quảng cáo" + nextNumberOfChildCampaign,
           }]
         })
       }}
         variant="contained">
-        Add
+        Thêm chiến dịch
       </Button>
       <Box display="flex" gap={2}>
         {
@@ -126,16 +119,25 @@ const Campaign = ({ control, watch }: Props) => {
           <Typography textTransform="uppercase" fontSize={22}>
             danh sách quảng cáo
           </Typography>
-          <Button onClick={() => {
-            appendAdv({
-              id: nextNumberOfChildCampaign,
-              title: 'ad' + nextNumberOfChildCampaign,
-              quantity: 0,
-              name: "Quảng cáo" + nextNumberOfChildCampaign,
-            })
-          }}>
-            Thêm
-          </Button>
+
+        </Box>
+        <Box marginY={2}>
+          <Box display="flex" gap={2} >
+            <Typography flexGrow={1}>Tên quảng cáo * </Typography>
+            <Typography flexGrow={1}>Số lượng * </Typography>
+            <Button onClick={() => {
+              appendAdv({
+                id: nextNumberOfChildCampaign,
+                title: 'ad' + nextNumberOfChildCampaign,
+                quantity: 0,
+                name: "Quảng cáo" + nextNumberOfChildCampaign,
+              })
+            }}
+              variant='contained'>
+              Thêm
+            </Button>
+          </Box>
+          <Divider />
         </Box>
         {
           childCampaign?.map((campaign: any, index: number) => {
