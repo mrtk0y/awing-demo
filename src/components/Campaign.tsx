@@ -3,7 +3,7 @@
 //TODO: fix any type
 
 import { Box, Button, Checkbox, Divider, FormControlLabel, TextField, Typography } from '@mui/material'
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form'
 import AdvertisementCard from './AdvertisementCard'
 import { ErrorMessage } from '@hookform/error-message'
@@ -62,7 +62,6 @@ const Campaign = ({ control, watch }: Props) => {
       }
     })
   }
-
 
   return (
     <Fragment>

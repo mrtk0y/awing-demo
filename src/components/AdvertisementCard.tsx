@@ -2,7 +2,6 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { Box, Button, Checkbox, TextField, Typography } from '@mui/material'
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form'
-import { useState } from 'react'
 
 type Props = {
   control: any
