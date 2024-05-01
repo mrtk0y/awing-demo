@@ -48,9 +48,7 @@ export type TChildCampaign = {
   }[]
 }
 function App() {
-
   const [activeTab, setActiveTab] = useState(FORMS.CAMPAIGN)
-
 
   const method = useForm({
     resolver: zodResolver(schema),
