@@ -165,11 +165,11 @@ const Campaign = ({ control, watch }: Props) => {
           }
         })}
         <Box marginTop={2} display='flex' alignItems={'center'}>
-          {isSelecting ? (
-            <Button variant={'contained'}>Selecting</Button>
-          ) : (
-            <Checkbox checked={isCheckedAll} onChange={() => setIsCheckedAll((pre) => !pre)}></Checkbox>
-          )}
+          <Checkbox
+            indeterminate={isSelecting && listAdSelected.length < _countAd}
+            checked={isCheckedAll || listAdSelected.length === _countAd}
+            onChange={() => setIsCheckedAll((pre) => !pre)}
+          ></Checkbox>
 
           {isCheckedAll || isSelecting ? (
             <Button
