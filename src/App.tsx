@@ -72,6 +72,7 @@ function App() {
           isActive: true,
           checked: false,
           intermediate: false,
+          //TODO: Xử lý khi chọn tất cả quảng cáo
           advertisement: [
             {
               id: 1,

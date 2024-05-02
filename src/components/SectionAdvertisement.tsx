@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, Divider, Typography } from '@mui/material'
 import AdvertisementCard from './AdvertisementCard.tsx'
-import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form'
+import { Controller, useFieldArray, useFormContext } from 'react-hook-form'
 
 export const SectionAdvertisement = ({ campaignIndex }: { campaignIndex: number }) => {
   const { control, getValues, setValue, watch } = useFormContext()
@@ -10,9 +10,9 @@ export const SectionAdvertisement = ({ campaignIndex }: { campaignIndex: number 
     keyName: '_id'
   })
 
-  const hehe = watch(`childCampaign.${campaignIndex}`)
+  const { childCampaign } = watch()
 
-  console.log('hehe', hehe)
+  console.log('childCampaign', childCampaign)
 
   const addNewAd = () => {}
 
