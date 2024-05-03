@@ -1,16 +1,14 @@
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Box from '@mui/material/Box'
-import { Fragment, useEffect, useState } from 'react'
-import CustomTabPanel from './components/CustomTabs'
-import Information from './components/Information'
-import Campaign from './components/Campaign'
+import { useEffect, useState } from 'react'
+import InformationPanel from './components/InformationPanel.tsx'
 import { Button } from '@mui/material'
 import Divider from '@mui/material/Divider'
 import { FormProvider, useForm } from 'react-hook-form'
-import { isEmpty } from './utils/isEmptyObject'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { SubCampaignsPanel } from './components/SubCampaignsPanel.tsx'
 
 enum FORMS {
   INFORMATION,
@@ -18,85 +16,76 @@ enum FORMS {
 }
 
 const schema = z.object({
-  name: z.string().min(1, { message: 'Bắt buộc' }),
-  childCampaign: z
-    .array(
-      z.object({
-        name: z.string().min(1, { message: 'Bắt buộc' }),
-        advertisement: z.array(
-          z.object({
-            quantity: z.number().min(1, { message: 'Số phải lớn hơn 0' }),
-            name: z.string().min(1, { message: 'Bắt buộc' })
-          })
-        )
-      })
-    )
-    .nonempty({ message: 'Bắt buộc' })
+  campaign: z.object({
+    information: z.object({
+      name: z.string().min(1, { message: 'Tên chiến dịch không được để trống' }),
+      describe: z.string()
+    }),
+    subCampaigns: z
+      .array(
+        z.object({
+          name: z.string().min(1, { message: 'Tên chiến dịch con không được để trống' }),
+          status: z.boolean(),
+          ads: z.array(
+            z.object({
+              name: z.string().min(1, { message: 'Không được trống' }),
+              quantity: z.number().min(1, { message: 'Số phải lớn hơn 0' })
+            })
+          )
+        })
+      )
+      .nonempty({ message: 'Bắt buộc' })
+  })
 })
 
-export type TFormData = {
-  name: string
-  id: string
-  description: string
-  childCampaign: TChildCampaign[]
-}
+export type TFormData = z.infer<typeof schema>
 
-export type FormFields = z.infer<typeof schema>
-
-export type TChildCampaign = {
-  name: string
-  id: string
-  advertisement: {
-    id: number
-    quantity: number
-    name: string
-  }[]
-}
-function App() {
-  const [activeTab, setActiveTab] = useState(FORMS.INFORMATION)
-
-  const method = useForm({
-    resolver: zodResolver(schema),
-    defaultValues: {
+const defaultValues: TFormData = {
+  campaign: {
+    information: {
       name: '',
-      description: '',
-      childCampaign: [
-        {
-          id: 1,
-          name: 'Chiến dịch 1',
-          isActive: true,
-          advertisement: [
-            {
-              id: 1,
-              quantity: 0,
-              name: 'Quảng cáo 1'
-            }
-          ]
-        }
-      ]
-    }
+      describe: ''
+    },
+    subCampaigns: [
+      {
+        name: 'Chiến dịch con 1',
+        status: true,
+        ads: [
+          {
+            quantity: 0,
+            name: 'Quảng cáo 1'
+          }
+        ]
+      }
+    ]
+  }
+}
+
+const App = () => {
+  const [activeTab, setActiveTab] = useState(FORMS.CAMPAIGN)
+
+  const method = useForm<TFormData>({
+    resolver: zodResolver(schema),
+    defaultValues
   })
 
   const {
     handleSubmit,
-    control,
-    formState: { errors },
-    watch
+    formState: { errors }
   } = method
 
   const onSubmit = (values: unknown) => {
-    console.log('!!values', values, isEmpty(errors))
     alert(JSON.stringify(values, null, 2))
   }
 
   useEffect(() => {
     if (Object.values(errors).length) {
       alert(JSON.stringify('Điền đủ thông tin', null, 2))
-      if (errors.name) {
+      if (errors.campaign?.information) {
         setActiveTab(FORMS.INFORMATION)
         return
       }
-      if (errors.childCampaign) {
+      if (errors.campaign?.subCampaigns) {
         setActiveTab(FORMS.CAMPAIGN)
         return
       }
@@ -104,40 +93,32 @@ function App() {
   }, [errors])
 
   return (
-    <Box paddingY={1}>
-      <Box display={'flex'} justifyContent={'end'} paddingX={2}>
-        <Button
-          type='submit'
-          variant='contained'
-          onClick={() => {
-            handleSubmit(onSubmit)()
-          }}
-        >
+    <Box>
+      <Box display={'flex'} justifyContent={'end'} paddingX={2} pb={1} pt={2}>
+        <Button type='submit' variant='contained' onClick={() => handleSubmit(onSubmit)()}>
           Submit
         </Button>
       </Box>
 
-      <Box marginY={2}>
-        <Divider />
-      </Box>
+      <Divider />
 
       <Box margin={2} boxShadow={1}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={activeTab} onChange={(_e, value) => setActiveTab(value)} aria-label='basic tabs example'>
-            <Tab label='Thông tin' />
-            <Tab label='Chiến dịch con' />
+            <Tab label='Thông tin' key={FORMS.INFORMATION}/>
+            <Tab label='Chiến dịch con' key={FORMS.CAMPAIGN} />
           </Tabs>
         </Box>
 
         <FormProvider {...method}>
-          <Fragment>
-            <CustomTabPanel value={activeTab} index={FORMS.INFORMATION}>
-              <Information control={control} errors={errors} />
-            </CustomTabPanel>
-            <CustomTabPanel value={activeTab} index={FORMS.CAMPAIGN}>
-              <Campaign control={control} watch={watch} />
-            </CustomTabPanel>
-          </Fragment>
+          <Box paddingY={2} paddingX={3}>
+            <Box hidden={activeTab !== FORMS.INFORMATION}>
+              <InformationPanel />
+            </Box>
+            <Box hidden={activeTab !== FORMS.CAMPAIGN}>
+              <SubCampaignsPanel />
+            </Box>
+          </Box>
         </FormProvider>
       </Box>
     </Box>
